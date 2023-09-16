@@ -19,8 +19,7 @@ public class Knight extends Piece {
 			for (int[] direction : directions) {
 				int x = this.getLocation()[0] + direction[0], y = this.getLocation()[1] + direction[1];
 				int[] location = new int[] { x, y };
-				if (Game.isValidLocation(location, this.getOwner())
-						&& (Game.board[x][y] == null || !Game.board[x][y].getOwner().equals(this.getOwner())))
+				if (Game.isValidLocation(location, this.getOwner()))
 					possibleMoves.add(location);
 			}
 		}

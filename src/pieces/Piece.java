@@ -41,6 +41,82 @@ abstract public class Piece {
 		return false;
 	}
 	
+	public boolean isALegalMove(int [] location) {
+		int oldRow = getLocation()[0] , oldColumn = getLocation()[1];
+		int newRow = location[0] , newColumn = location[1];
+		Piece oldPiece = Game.testBoard[newRow][newColumn];
+		int kingRow = this.getOwner().getKingsLocation()[0],
+			kingColumn = this.getOwner().getKingsLocation()[1];
+		// try to move the piece and see what happens
+		Game.testBoard[oldRow][oldColumn] = null;
+		Game.testBoard[newRow][newColumn] = this;
+		boolean isLegal = true;
+		isLegal &= checkDiagonals(kingRow, kingColumn);
+		isLegal &= checkRowsAndColumns(kingRow , kingColumn);
+		isLegal &= checkTheOtherKing(kingRow , kingColumn);
+		//TODO checking pawns
+		//reset everything before returning
+		Game.testBoard[oldRow][oldColumn] = this;
+		Game.testBoard[newRow][newColumn] = oldPiece;
+		return isLegal;
+	}
+	
+	private boolean checkDiagonals(int kingRow , int kingColumn) {
+		int[][] directions = { { -1, -1 }, { -1, 1 }, { 1, -1 }, { 1, 1 } };
+		for (int[] direction : directions) {
+			int counter = 1;
+			while (true) {
+				int x = kingRow + direction[0] * counter,
+						y = kingColumn + direction[1] * counter;
+				int[] location = new int[] { x, y };
+				if (Game.isInsideTheBoard(location)) {
+					Piece currPiece = Game.testBoard[x][y];
+					if(currPiece != null) {
+						if(currPiece.getOwner().equals(this.getOwner())) break;
+						else {
+							if((currPiece instanceof Bishop) || (currPiece instanceof Queen)) return false;
+						}
+					}
+				} else
+					break;
+				counter++;
+			}
+		}
+		return true;
+	}
+	
+	private boolean checkRowsAndColumns(int kingRow, int kingColumn) {
+		int[][] directions = { { -1, 0 }, { 0, -1 }, { 1, 0 }, { 0, 1 } };
+		for (int[] direction : directions) {
+			int counter = 1;
+			while (true) {
+				int x = kingRow + direction[0] * counter,
+						y = kingColumn + direction[1] * counter;
+				int[] location = new int[] { x, y };
+				if (Game.isInsideTheBoard(location)) {
+					Piece currPiece = Game.testBoard[x][y];
+					if(currPiece != null) {
+						if(currPiece.getOwner().equals(this.getOwner())) break;
+						else {
+							if((currPiece instanceof Rook) || (currPiece instanceof Queen)) return false;
+						}
+					}
+				} else
+					break;
+				counter++;
+			}
+		}
+		return true;
+	}
+	
+	private boolean checkTheOtherKing(int kingRow , int kingColumn) {
+		int [] otherKingLocation = Game.otherPlayer.getKingsLocation();
+		int otherKingRow = otherKingLocation[0] ,
+				otherKingColumn = otherKingLocation[1];
+		return Math.abs(kingRow - otherKingRow) <= 1 && Math.abs(kingColumn - otherKingColumn) <= 1;
+	}
+	
+	
 	public Player getOwner() {
 		return owner;
 	}

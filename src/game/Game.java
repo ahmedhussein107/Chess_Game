@@ -9,6 +9,7 @@ public class Game {
 	public static int turn;
 	public static Player currPlayer , otherPlayer;
 	public static Piece [][] board;
+	public static Piece [][] testBoard;
 	public static Player playerOne , playerTwo;
 	public static ArrayList<Move> history;
 	
@@ -16,6 +17,7 @@ public class Game {
 		turn = 1;
 		currPlayer = playerOne;
 		board = new Piece [8][8];
+		testBoard = new Piece [8][8];
 		history = new ArrayList<>();
 		createFirstBoard();
 	}
@@ -30,6 +32,7 @@ public class Game {
 	private static void createPawns(Player player , int row) {
 		for(int i =0 ; i < 8 ; i++) {
 			board[row][i] = new Pawn(player, row, i);
+			testBoard[row][i] = board[row][i];
 			player.getPieces().add(board[row][i]);
 		}
 	}
@@ -43,6 +46,7 @@ public class Game {
 		board[row][5] = new Bishop(player , row , 5);
 		board[row][6] = new Knight(player , row , 6);
 		board[row][7] = new Rook(player , row , 7);
+		for(int i = 0 ; i < 8 ; i++) testBoard[row][i] = board[row][i];
 		player.getPieces().addAll(Arrays.asList(board[row]));
 		player.setKingsLocation(new int[] {row , 4});
 	}
@@ -52,8 +56,14 @@ public class Game {
 	}
 	
 	public static boolean isValidLocation(int [] location , Player player) {
-		int x = location[0] , y = location[1];
-		return x > -1 && x < 8 && y > -1 && y < 8;
+		int row = location[0] , column = location[1];
+		return isInsideTheBoard(location) &&
+				(Game.board[row][column] == null || !Game.board[row][column].getOwner().equals(player));
+	}
+	
+	public static boolean isInsideTheBoard(int [] location) {
+		int row = location[0] , column = location[1];
+		return row > -1 && row < 8 && column > -1 && column < 8;
 	}
 	
 			// 7 r k b q k b k r             
