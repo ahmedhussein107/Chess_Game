@@ -27,7 +27,8 @@ public class Rook extends Piece {
 							y = this.getLocation()[1] + direction[1] * counter;
 					int[] location = new int[] { x, y };
 					if (Game.isValidLocation(location, this.getOwner())) {
-						possibleMoves.add(location);
+						if(isLegalMove(location))
+							possibleMoves.add(location);
 						if (Game.board[x][y] != null)
 							break;
 					} else

@@ -1,5 +1,7 @@
 package pieces;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Objects;
 
 import game.Game;
 import game.Move;
@@ -34,6 +36,8 @@ abstract public class Piece {
 				}
 				Game.board[newX][newY] = this;
 				Game.history.add(new Move(this, oldLocation, newLocation));
+				Game.positions.put(Game.getBoard(), Game.positions.getOrDefault(Game.getBoard(), 0)+1);
+				Game.board[newX][newY].setLocation(newLocation);
 				this.firstMove = false;
 				return true;
 			}
@@ -41,7 +45,7 @@ abstract public class Piece {
 		return false;
 	}
 	
-	public boolean isALegalMove(int [] location) {
+	public boolean isLegalMove(int [] location) {
 		int oldRow = getLocation()[0] , oldColumn = getLocation()[1];
 		int newRow = location[0] , newColumn = location[1];
 		Piece oldPiece = Game.testBoard[newRow][newColumn];
@@ -53,8 +57,8 @@ abstract public class Piece {
 		boolean isLegal = true;
 		isLegal &= checkDiagonals(kingRow, kingColumn);
 		isLegal &= checkRowsAndColumns(kingRow , kingColumn);
-		isLegal &= checkTheOtherKing(kingRow , kingColumn);
-		//TODO checking pawns
+		isLegal &= checkKnights(kingRow , kingColumn);
+		isLegal &= checkPawns(kingRow , kingColumn);
 		//reset everything before returning
 		Game.testBoard[oldRow][oldColumn] = this;
 		Game.testBoard[newRow][newColumn] = oldPiece;
@@ -109,11 +113,38 @@ abstract public class Piece {
 		return true;
 	}
 	
-	private boolean checkTheOtherKing(int kingRow , int kingColumn) {
-		int [] otherKingLocation = Game.otherPlayer.getKingsLocation();
-		int otherKingRow = otherKingLocation[0] ,
-				otherKingColumn = otherKingLocation[1];
-		return Math.abs(kingRow - otherKingRow) <= 1 && Math.abs(kingColumn - otherKingColumn) <= 1;
+	private boolean checkKnights(int kingRow, int kingColumn) {
+		int[][] directions = { { -2, -1 }, { -2, 1 }, { 2, -1 }, { 2, 1 },
+				{ -1, -2 }, { -1, 2 }, { 1, -2 }, { 1, 2 } };
+		for(int[] direction: directions) {
+			int x = kingRow + direction[0], y = kingColumn + direction[1];
+			int[] location = new int[] { x, y };
+			if (Game.isInsideTheBoard(location)) {
+				Piece currPiece = Game.testBoard[x][y];
+				if(currPiece != null) {
+					if(!currPiece.getOwner().equals(this.getOwner()) && (currPiece instanceof Knight))
+						return false;
+				}
+			}
+		}
+		return true;
+	}
+	
+	private boolean checkPawns(int kingRow, int kingColumn) {
+		int forward = Game.testBoard[kingRow][kingColumn].getOwner().getForward();
+		int[] directions = {1,-1};
+		for(int direction: directions) {
+			int x = kingRow + forward, y = kingColumn + direction;
+			int[] location = new int[] {x,y};
+			if(Game.isInsideTheBoard(location)) {
+				Piece currPiece = Game.testBoard[x][y];
+				if(currPiece != null) {
+					if(!currPiece.getOwner().equals(this.getOwner()) && (currPiece instanceof Pawn)) 
+						return false;
+				}
+			}
+		}
+		return true;
 	}
 	
 	
@@ -141,5 +172,19 @@ abstract public class Piece {
 	public void setFirstMove(boolean firstMove) {
 		this.firstMove = firstMove;
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (!(obj instanceof Piece)) {
+			return false;
+		}
+		Piece other = (Piece) obj;
+		return firstMove == other.firstMove && Arrays.equals(location, other.location)
+				&& Objects.equals(owner, other.owner) && points == other.points;
+	}
+	
 	
 }
