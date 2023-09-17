@@ -11,12 +11,10 @@ public class Player {
 	private int forward;
 	private int color;
 	
-	public Player(String name , int color) {
+	public Player(String name) {
 		this.name = name;
 		this.points = 33;
 		this.pieces = new ArrayList<>();
-		this.color = color;
-		this.forward = color == 1 ? 1 : -1;
 	}
 
 	public int getForward() {
@@ -33,6 +31,7 @@ public class Player {
 
 	public void setColor(int color) {
 		this.color = color;
+		this.forward = color == 1 ? 1 : -1;
 	}
 
 	public String getName() {
